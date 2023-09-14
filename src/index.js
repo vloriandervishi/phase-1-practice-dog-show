@@ -27,12 +27,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
           tableBody.appendChild(tr);
         });
+        const getForm = document.querySelector("#dog-form");
+        getForm.addEventListener("click", (e) => {
+          e.preventDefault();
+          console.log(e.target);
+        });
         tableBody.addEventListener("click", (e) => {
           if (e.target.tagName === "BUTTON" && e.target.id === "edit-button") {
             const tr = e.target.closest("tr");
             const tds = tr.querySelectorAll("td");
 
             const textContents = Array.from(tds).map((td) => td.textContent);
+
+            const input = document.querySelectorAll("input");
+            input.forEach((place, index) => {
+              place.placeholder = textContents[index];
+            });
             console.log(textContents);
           }
         });
