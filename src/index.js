@@ -1,13 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const objdog = {};
+
   (function Dogs() {
     return fetch(`http://localhost:3000/dogs`)
       .then((response) => response.json())
       .then((data) => {
         const tableBody = document.querySelector("#table-body");
-        const editButton = document.getElementById("edit-button");
         data.forEach((dogs) => {
-          const { name, breed, sex } = dogs;
+          const { id, name, breed, sex } = dogs;
           const tr = document.createElement("tr");
+
           const tdName = document.createElement("td");
           tdName.innerText = name;
           tr.appendChild(tdName);
@@ -22,30 +24,64 @@ document.addEventListener("DOMContentLoaded", () => {
           const tdButton = document.createElement("button");
           tdButton.textContent = "Edit Dog";
           tdButton.id = "edit-button";
+          tdButton.setAttribute("data-btnID", id);
           tdButton.classList = `btn btn-secondary`;
           tr.appendChild(tdButton);
 
           tableBody.appendChild(tr);
         });
+        const input = document.querySelectorAll("input");
+
         const getForm = document.querySelector("#dog-form");
-        getForm.addEventListener("click", (e) => {
+        getForm.addEventListener("submit", (e) => {
           e.preventDefault();
-          console.log(e.target);
+
+          Object.assign(objdog, {
+            id: objdog.id,
+            name: e.target.name.value,
+            breed: e.target.breed.value,
+            sex: e.target.sex.value,
+          });
+          console.log(objdog.id);
+          updateDogInfo(objdog);
         });
         tableBody.addEventListener("click", (e) => {
           if (e.target.tagName === "BUTTON" && e.target.id === "edit-button") {
             const tr = e.target.closest("tr");
             const tds = tr.querySelectorAll("td");
-
             const textContents = Array.from(tds).map((td) => td.textContent);
-
-            const input = document.querySelectorAll("input");
+            console.log(e.target.dataset.btnid);
             input.forEach((place, index) => {
+              Object.assign(objdog, {
+                id: e.target.dataset.btnid,
+                name: textContents[0],
+                breed: textContents[1],
+                sex: textContents[2],
+              });
+
+              place.setAttribute("data-input", e.target.dataset.btnid);
               place.placeholder = textContents[index];
             });
-            console.log(textContents);
+            console.log(objdog);
           }
         });
       });
   })();
+  console.log(objdog);
+
+  function updateDogInfo(obj) {
+    fetch(`http://localhost:3000/dogs/${obj.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(obj),
+    })
+      .then((response) => response.json())
+      .then((data = console.log(data)))
+      .catch((error) => {
+        console.log(error.message);
+      });
+  }
 });
